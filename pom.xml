@@ -14,6 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <postgresql.version>42.7.14</postgresql.version>
         <hibernate.version>7.4.13.Final</hibernate.version>
+        <logback.version>1.6.5</logback.version>
     </properties>
 
     <dependencies>
@@ -28,6 +29,12 @@
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
             <type>pom</type>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
