@@ -28,7 +28,6 @@
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
             <version>${hibernate.version}</version>
-            <type>pom</type>
             <scope>compile</scope>
         </dependency>
         <dependency>
