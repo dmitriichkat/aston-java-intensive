@@ -11,7 +11,7 @@ public interface UserDao {
 
     List <User> findAll();
 
-    User findById (Long id);
+    Optional <User> findById (Long id);
 
     User update(User user);
 
