@@ -7,8 +7,11 @@ import org.slf4j.LoggerFactory;
 import ru.aston.entity.User;
 import org.hibernate.Transaction;
 import ru.aston.exception.DaoException;
+import ru.aston.exception.DuplicateEmailException;
 import ru.aston.util.HibernateUtil;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Optional;
 
 public class UserDaoImpl implements UserDao{
 
@@ -24,6 +27,16 @@ public class UserDaoImpl implements UserDao{
 
     private static final Logger logger = LoggerFactory.getLogger(UserDaoImpl.class);
 
+
+    private boolean checkEmailDuplicate (Throwable exception) {
+        for (Throwable throwable = exception; throwable != null; throwable = throwable.getCause()) {
+            if (throwable instanceof SQLException sql && "23505".equals(sql.getSQLState())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @Override
     public User save(User user) {
         Transaction transaction = null;
@@ -36,6 +49,10 @@ public class UserDaoImpl implements UserDao{
             return user;
         } catch (RuntimeException e) {
             rollback(transaction);
+            if (checkEmailDuplicate(e)){
+                logger.warn("Found already existing user with this email while saving");
+                throw new DuplicateEmailException("User with this email already exists", e);
+            }
             logger.error("Failed to save new user", e);
             throw new DaoException("Failed to save new user", e);
         }
@@ -58,14 +75,14 @@ public class UserDaoImpl implements UserDao{
     }
 
     @Override
-    public User findById(Long id) {
+    public Optional <User> findById(Long id) {
         Transaction transaction = null;
 
         try (Session session = sessionFactory.openSession()) {
             transaction = session.beginTransaction();
             User user = session.find(User.class, id);
             transaction.commit();
-            return user;
+            return Optional.ofNullable(user);
         } catch (RuntimeException e) {
             rollback(transaction);
             logger.error("Failed to find user with Id = {}", id, e);
@@ -85,6 +102,10 @@ public class UserDaoImpl implements UserDao{
             return updatedUser;
         } catch (RuntimeException e) {
             rollback(transaction);
+            if (checkEmailDuplicate(e)){
+                logger.warn("Found already existing user with this email while updating");
+                throw new DuplicateEmailException("User with this email already exists", e);
+            }
             logger.error("Failed to update user with Id = {}", user.getId(), e);
             throw new DaoException("Failed to update user with Id = " + user.getId(), e);
         }
