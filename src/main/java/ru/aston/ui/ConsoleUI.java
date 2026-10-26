@@ -2,9 +2,10 @@ package ru.aston.ui;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.aston.dao.UserDao;
 import ru.aston.entity.User;
 import ru.aston.exception.DaoException;
+import ru.aston.exception.UserNotFoundException;
+import ru.aston.service.UserService;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -27,11 +28,11 @@ public class ConsoleUI {
     private static final int AGE_MIN = 1;
     private static final int AGE_MAX = 150;
 
-    private final UserDao userDao;
+    private final UserService userService;
     private final Scanner scanner;
 
-    public ConsoleUI(UserDao userDao, Scanner scanner) {
-        this.userDao = userDao;
+    public ConsoleUI(UserService userService, Scanner scanner) {
+        this.userService = userService;
         this.scanner = scanner;
     }
 
@@ -51,6 +52,8 @@ public class ConsoleUI {
                     case "0" -> running = false;
                     default -> System.out.println("Неизвестная команда. Введите число из меню.");
                 }
+            } catch (UserNotFoundException e) {
+                System.out.println(e.getMessage());
             } catch (DaoException e) {
                 System.out.println("Ошибка при работе с БД: " + e.getMessage());
             } catch (Exception e) {
@@ -80,25 +83,20 @@ public class ConsoleUI {
         String email = readEmail("Email: ");
         int age = readAge("Возраст: ");
 
-        User user = new User();
-        user.setName(name);
-        user.setEmail(email);
-        user.setAge(age);
-
-        User saved = userDao.save(user);
+        User saved = userService.saveUser(name, email, age);
         System.out.println("Пользователь создан: " + saved);
     }
 
     private void findById() {
         Long id = readId("Введите ID: ");
-        userDao.findById(id).ifPresentOrElse(
+        userService.findById(id).ifPresentOrElse(
                 System.out::println,
                 () -> System.out.println("Пользователь с ID=" + id + " не найден.")
         );
     }
 
     private void findAll() {
-        List<User> users = userDao.findAll();
+        List<User> users = userService.findAll();
         if (users.isEmpty()) {
             System.out.println("Список пуст.");
             return;
@@ -114,7 +112,7 @@ public class ConsoleUI {
 
     private void updateUser() {
         Long id = readId("Введите ID пользователя: ");
-        Optional<User> found = userDao.findById(id);
+        Optional<User> found = userService.findById(id);
         if (found.isEmpty()) {
             System.out.println("Пользователь с ID=" + id + " не найден.");
             return;
@@ -126,17 +124,13 @@ public class ConsoleUI {
         String email = readEmail("Новый email [" + existing.getEmail() + "]: ", existing.getEmail());
         int age = readAge("Новый возраст [" + existing.getAge() + "]: ", existing.getAge());
 
-        existing.setName(name);
-        existing.setEmail(email);
-        existing.setAge(age);
-
-        User updated = userDao.update(existing);
+        User updated = userService.updateUser(id, name, email, age);
         System.out.println("Обновлено: " + updated);
     }
 
     private void deleteUser() {
         Long id = readId("Введите ID для удаления: ");
-        boolean deleted = userDao.delete(id);
+        boolean deleted = userService.deleteUser(id);
         if (deleted) {
             System.out.println("Пользователь с ID=" + id + " удалён.");
         } else {
