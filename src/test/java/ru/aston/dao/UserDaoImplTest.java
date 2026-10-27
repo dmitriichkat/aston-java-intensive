@@ -175,4 +175,101 @@ public class UserDaoImplTest {
             assertTrue(userDao.findById(Long.MAX_VALUE).isEmpty());
         }
     }
+
+    @Nested
+    @DisplayName("Update operation tests")
+    class UpdateUser {
+
+        @Test
+        @DisplayName("User successfully updated, changes saved to db")
+        void returnUpdatedUserWhenUpdated() {
+            User saved = userDao.save(createUser("Ivan", "ivan@example.com", 20));
+
+            saved.setName("Petr");
+            saved.setEmail("petr@example.com");
+            saved.setAge(25);
+
+            User updated = userDao.update(saved);
+
+            assertAll(
+                    () -> assertNotNull(updated),
+                    () -> assertEquals(saved.getId(), updated.getId()),
+                    () -> assertEquals("Petr", updated.getName()),
+                    () -> assertEquals("petr@example.com", updated.getEmail()),
+                    () -> assertEquals(25, updated.getAge())
+            );
+
+            User fromDb = userExist(saved.getId());
+
+            assertAll(
+                    () -> assertEquals(saved.getId(), fromDb.getId()),
+                    () -> assertEquals("Petr", fromDb.getName()),
+                    () -> assertEquals("petr@example.com", fromDb.getEmail()),
+                    () -> assertEquals(25, fromDb.getAge()),
+                    () -> assertEquals(1, userDao.findAll().size())
+            );
+        }
+
+        @Test
+        @DisplayName("User with duplicate email throws duplicate exception, db not changed")
+        void throwDuplicateEmailExceptionWhenUpdating() {
+            User firstSaved = userDao.save(createUser("Ivan", "ivan@example.com", 20));
+            User secondSaved = userDao.save(createUser("Alex", "alex@example.com", 30));
+
+            secondSaved.setEmail(firstSaved.getEmail());
+
+            assertThrows(DuplicateEmailException.class, () -> userDao.update(secondSaved));
+
+            User secondFromDb = userExist(secondSaved.getId());
+
+            assertAll(
+                    () -> assertEquals(2, userDao.findAll().size()),
+                    () -> assertEquals(secondSaved.getId(), secondFromDb.getId()),
+                    () -> assertEquals("Alex", secondFromDb.getName()),
+                    () -> assertEquals("alex@example.com", secondFromDb.getEmail()),
+                    () -> assertEquals(30, secondFromDb.getAge())
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("Delete operation tests")
+    class DeleteUser {
+
+        @Test
+        @DisplayName("User successfully deleted from db")
+        void returnTrueAndDeleteUserWhenExists() {
+            User saved = userDao.save(createUser("Ivan", "ivan@example.com", 20));
+
+            assertTrue(userDao.delete(saved.getId()));
+
+            assertAll(
+                    () -> assertTrue(userDao.findById(saved.getId()).isEmpty()),
+                    () -> assertTrue(userDao.findAll().isEmpty())
+            );
+        }
+
+        @Test
+        @DisplayName("Only target user deleted, other users remain")
+        void deleteOnlyTargetUser() {
+            User firstSaved = userDao.save(createUser("Ivan", "ivan@example.com", 20));
+            User secondSaved = userDao.save(createUser("Alex", "alex@example.com", 30));
+
+            assertTrue(userDao.delete(firstSaved.getId()));
+
+            assertAll(
+                    () -> assertTrue(userDao.findById(firstSaved.getId()).isEmpty()),
+                    () -> assertTrue(userDao.findById(secondSaved.getId()).isPresent()),
+                    () -> assertEquals(1, userDao.findAll().size()),
+                    () -> assertEquals(secondSaved.getId(), userDao.findAll().get(0).getId())
+            );
+        }
+
+        @Test
+        @DisplayName("Return false when user not found")
+        void returnFalseWhenUserNotFound() {
+            assertFalse(userDao.delete(Long.MAX_VALUE));
+            assertTrue(userDao.findAll().isEmpty());
+        }
+    }
 }
