@@ -8,6 +8,7 @@
 1. Создание локальной базы данных **astondb**;
 2. Настройка переменных окружения **DB_USER** и **DB_PASSWORD**;
 3. Запуск приложения через **Main.java**, ветка **develop**.
+4. Запуск **Docker** перед тестированием **testcontainers**.
 
 ## Модуль 2. SQL, Hibernate, JPA
 Разработать консольное приложение (user-service) на Java, использующее Hibernate для взаимодействия с PostgreSQL, без использования Spring.
@@ -43,3 +44,4 @@
 * **JUnit 5**
 * **Mockito**
 * **Testcontainers**
+* **Docker**
