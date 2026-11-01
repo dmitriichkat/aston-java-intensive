@@ -1,4 +1,4 @@
-package ru.aston.userservice;
+package ru.aston;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
