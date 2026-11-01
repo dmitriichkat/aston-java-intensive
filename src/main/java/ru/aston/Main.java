@@ -8,12 +8,12 @@ import ru.aston.util.HibernateUtil;
 import java.util.Scanner;
 
 public class Main {
-    public static void main(String[] args) {
-        try (Scanner scanner = new Scanner(System.in)) {
-            UserService userService = new UserServiceImpl();
-            new ConsoleUI(userService, scanner).start();
-        } finally {
-            HibernateUtil.shutdown();
-        }
-    }
+//    public static void main(String[] args) {
+//        try (Scanner scanner = new Scanner(System.in)) {
+//            UserService userService = new UserServiceImpl();
+//            new ConsoleUI(userService, scanner).start();
+//        } finally {
+//            HibernateUtil.shutdown();
+//        }
+//    }
 }

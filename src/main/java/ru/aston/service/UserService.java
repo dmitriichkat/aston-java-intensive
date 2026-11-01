@@ -1,20 +1,21 @@
 package ru.aston.service;
 
-import ru.aston.entity.User;
+import ru.aston.dto.CreateUserRequest;
+import ru.aston.dto.UpdateUserRequest;
+import ru.aston.dto.UserResponse;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface UserService {
 
-    User saveUser (String name, String email, int age);
+    UserResponse saveUser(CreateUserRequest createUserRequest);
 
-    List<User> findAll();
+    List<UserResponse> findAll();
 
-    Optional<User> findById (Long id);
+    UserResponse findById(Long id);
 
-    User updateUser(Long id, String name, String email, int age);
+    UserResponse updateUser(Long id, UpdateUserRequest updateUserRequest);
 
-    boolean deleteUser (Long id);
+    void deleteUser(Long id);
 
 }

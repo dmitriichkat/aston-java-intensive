@@ -1,25 +1,30 @@
 package ru.aston.mapping;
 
 import org.springframework.stereotype.Component;
+import ru.aston.dto.CreateUserRequest;
+import ru.aston.dto.UpdateUserRequest;
+import ru.aston.dto.UserResponse;
 import ru.aston.entity.User;
 
 @Component
 public class UserMapper {
 
-    public User toEntity(UserRequestDto dto) {
+    public User toEntity(CreateUserRequest createUserRequest) {
         User user = new User();
-        updateEntity(user, dto);
+        user.setName(createUserRequest.name());
+        user.setEmail(createUserRequest.email());
+        user.setAge(createUserRequest.age());
         return user;
     }
 
-    public void updateEntity(User user, UserRequestDto dto) {
-        user.setName(dto.name());
-        user.setEmail(dto.email());
-        user.setAge(dto.age());
+    public void updateEntity(User user, UpdateUserRequest updateUserRequest) {
+        user.setName(updateUserRequest.name());
+        user.setEmail(updateUserRequest.email());
+        user.setAge(updateUserRequest.age());
     }
 
-    public UserResponseDto toDto(User user) {
-        return new UserResponseDto(
+    public UserResponse toResponse(User user) {
+        return new UserResponse(
                 user.getId(),
                 user.getName(),
                 user.getEmail(),

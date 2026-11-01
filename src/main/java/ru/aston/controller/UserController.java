@@ -5,6 +5,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import ru.aston.dto.CreateUserRequest;
+import ru.aston.dto.UpdateUserRequest;
+import ru.aston.dto.UserResponse;
 import ru.aston.service.UserService;
 
 import java.net.URI;
@@ -20,18 +23,18 @@ public class UserController {
     }
 
     @GetMapping
-    public List<UserResponseDto> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userService.findAll();
     }
 
     @GetMapping("/{id}")
-    public UserResponseDto getById(@PathVariable Long id) {
+    public UserResponse getById(@PathVariable Long id) {
         return userService.findById(id);
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserRequestDto userRequestDto) {
-        UserResponseDto created = userService.createUser(userRequestDto);
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
+        UserResponse created = userService.saveUser(createUserRequest);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(created.id())
@@ -40,8 +43,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserResponseDto updateUser(@PathVariable Long id, @Valid @RequestBody UserRequestDto userRequestDto) {
-        return userService.updateUser(id, userRequestDto);
+    public UserResponse updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest updateUserRequest) {
+        return userService.updateUser(id, updateUserRequest);
     }
 
     @DeleteMapping("/{id}")
