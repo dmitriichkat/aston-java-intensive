@@ -12,7 +12,7 @@ public record UpdateUserRequest(
     @Size(max = 100)
     String email,
 
-    @NotBlank
+    @NotNull
     @Min(value = 1)
     @Max(value = 120)
     Integer age
