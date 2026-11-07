@@ -8,12 +8,15 @@ import ru.aston.dto.CreateUserRequest;
 import ru.aston.dto.UpdateUserRequest;
 import ru.aston.dto.UserResponse;
 import ru.aston.entity.User;
+import ru.aston.event.UserEvent;
+import ru.aston.event.UserEventPublisher;
 import ru.aston.exception.DuplicateEmailException;
 import ru.aston.exception.UserNotFoundException;
 import ru.aston.mapping.UserMapper;
 import ru.aston.repository.UserRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,10 +28,12 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final UserEventPublisher userEventPublisher;
 
-    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper, UserEventPublisher userEventPublisher) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.userEventPublisher = userEventPublisher;
     }
 
     @Override
@@ -39,6 +44,7 @@ public class UserServiceImpl implements UserService {
             throw new DuplicateEmailException(DUPLICATE_EMAIL_MESSAGE);
         }
         User saved = userRepository.saveAndFlush(userMapper.toEntity(createUserRequest));
+        userEventPublisher.publish(new UserEvent(saved.getId(), saved.getEmail(), UserEvent.UserEventType.CREATED));
         logger.info("User with Id {} created", saved.getId());
         return userMapper.toResponse(saved);
     }
@@ -84,7 +90,9 @@ public class UserServiceImpl implements UserService {
             logger.warn("User with id {} not found", id);
             throw new UserNotFoundException(id);
         }
+        Optional<User> deleted = userRepository.findById(id);
         userRepository.deleteById(id);
+        userEventPublisher.publish(new UserEvent(deleted.get().getId(), deleted.get().getEmail(), UserEvent.UserEventType.DELETED));
         logger.info("User with Id {} deleted", id);
     }
 }
