@@ -9,6 +9,8 @@ import ru.aston.dto.CreateUserRequest;
 import ru.aston.dto.UpdateUserRequest;
 import ru.aston.dto.UserResponse;
 import ru.aston.entity.User;
+import ru.aston.event.UserEvent;
+import ru.aston.event.UserEventPublisher;
 import ru.aston.exception.DuplicateEmailException;
 import ru.aston.exception.UserNotFoundException;
 import ru.aston.mapping.UserMapper;
@@ -29,6 +31,7 @@ class UserServiceImplTest {
 
     @Mock UserRepository userRepository;
     @Mock UserMapper userMapper;
+    @Mock UserEventPublisher userEventPublisher;
     @InjectMocks
     UserServiceImpl userService;
 
@@ -60,6 +63,7 @@ class UserServiceImplTest {
         assertEquals(1L, result.id());
         verify(userRepository).existsByEmail("ivan@test.com");
         verify(userRepository).saveAndFlush(u);
+        verify(userEventPublisher).publish(any(UserEvent.class));
     }
 
     @Test
@@ -69,6 +73,7 @@ class UserServiceImplTest {
 
         assertThrows(DuplicateEmailException.class, () -> userService.saveUser(req));
         verify(userRepository, never()).saveAndFlush(any());
+        verifyNoInteractions(userEventPublisher);
     }
 
     @Test
@@ -161,9 +166,14 @@ class UserServiceImplTest {
 
     @Test
     void deleteUser_success() {
+        User u = user();
         when(userRepository.existsById(1L)).thenReturn(true);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(u));
+
         userService.deleteUser(1L);
+
         verify(userRepository).deleteById(1L);
+        verify(userEventPublisher).publish(any(UserEvent.class));
     }
 
     @Test
@@ -171,5 +181,6 @@ class UserServiceImplTest {
         when(userRepository.existsById(99L)).thenReturn(false);
         assertThrows(UserNotFoundException.class, () -> userService.deleteUser(99L));
         verify(userRepository, never()).deleteById(anyLong());
+        verifyNoInteractions(userEventPublisher);
     }
 }

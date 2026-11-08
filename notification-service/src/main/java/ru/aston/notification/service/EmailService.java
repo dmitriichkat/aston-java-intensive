@@ -35,7 +35,7 @@ public class EmailService {
         logger.info("Email about {} sent", type);
     }
 
-    String buildText (UserEvent.UserEventType type) {
+    public String buildText(UserEvent.UserEventType type) {
         return switch (type) {
             case CREATED -> "Здравствуйте! Ваш аккаунт на сайте " + siteName + " был успешно создан.";
             case DELETED -> "Здравствуйте! Ваш аккаунт был удалён.";

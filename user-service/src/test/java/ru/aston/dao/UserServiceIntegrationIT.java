@@ -7,8 +7,10 @@ import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRe
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import ru.aston.dto.CreateUserRequest;
 import ru.aston.dto.UserResponse;
+import ru.aston.event.UserEventPublisher;
 
 import java.util.UUID;
 
@@ -17,6 +19,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureTestRestTemplate
 class UserServiceIntegrationIT {
+
+    @MockitoBean UserEventPublisher userEventPublisher;
 
     @LocalServerPort int port;
     @Autowired TestRestTemplate rest;
