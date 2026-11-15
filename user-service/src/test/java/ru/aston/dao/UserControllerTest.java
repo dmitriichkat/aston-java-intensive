@@ -2,9 +2,11 @@ package ru.aston.dao;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.aston.assembler.UserModelAssembler;
 import ru.aston.controller.UserController;
 import ru.aston.dto.CreateUserRequest;
 import ru.aston.dto.UpdateUserRequest;
@@ -25,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
+@Import(UserModelAssembler.class)
 class UserControllerTest {
 
     @Autowired
@@ -41,7 +44,9 @@ class UserControllerTest {
         when(userService.findAll()).thenReturn(List.of(sample));
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].email").value("ivan@test.com"));
+                .andExpect(jsonPath("$._embedded.userResponseList[0].email").value("ivan@test.com"))
+                .andExpect(jsonPath("$._embedded.userResponseList[0]._links.self.href").exists())
+                .andExpect(jsonPath("$._links.self.href").exists());
     }
 
     @Test
