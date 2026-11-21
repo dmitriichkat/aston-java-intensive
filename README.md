@@ -62,6 +62,15 @@
 * Задокументировать существующее API (из задания 4) с помощью Swagger (Springdoc OpenAPI), чтобы можно было легко изучить и тестировать API через веб-интерфейс.
 * Добавить поддержку HATEOAS, чтобы API предоставляло ссылки для навигации по ресурсам.
 
+## Модуль 7. Паттерны микросервисной архитектуры
+Добавить к существующей системе паттерны: 
+* gateway api, 
+* service discovery, 
+* circuit breaker, 
+* external configuration (https://github.com/dmitriichkat/aston-config-repo)
+
+Реализации данных паттернов можно найти в модулях spring cloud.
+
 ## Стек технологий
 * **JDK 19**
 * **Maven**
@@ -75,3 +84,4 @@
 * **Kafka**
 * **Swagger**
 * **HATEOAS**
+* **Spring Cloud**

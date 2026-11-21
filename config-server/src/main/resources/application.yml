@@ -1,0 +1,9 @@
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/dmitriichkat/aston-config-repo
+          default-label: main
+server:
+  port: 8888
